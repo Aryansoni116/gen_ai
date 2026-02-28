@@ -1,3 +1,6 @@
+import os
+import zipfile
+import gdown
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -15,6 +18,24 @@ app.mount("/static", StaticFiles(directory="frontend"), name="static")
 @app.get("/")
 def serve_frontend():
     return FileResponse("frontend/index.html")
+
+# -----------------------------
+# Download & Extract Model (One-Time Setup)
+# -----------------------------
+MODEL_DIR = "data"
+ZIP_FILE = "data.zip"
+FILE_ID = "1KJzGif2a1HqSWGwOoqNMTWCS_wz65Ba0"
+
+if not os.path.exists(MODEL_DIR):
+    print("Downloading model zip from Google Drive...")
+    url = f"https://drive.google.com/uc?export=download&id={FILE_ID}"
+    gdown.download(url, ZIP_FILE, quiet=False)
+
+    print("Extracting model...")
+    with zipfile.ZipFile(ZIP_FILE, 'r') as zip_ref:
+        zip_ref.extractall(".")
+
+    print("Model extracted successfully!")
 
 # -----------------------------
 # Model Setup (Lazy Loading)

@@ -25,13 +25,10 @@ def serve_frontend():
 MODEL_DIR = "data"
 ZIP_FILE = "data.zip"
 FILE_ID = "1KJzGif2a1HqSWGwOoqNMTWCS_wz65Ba0"
-MODEL_PATH = "data"
+MODEL_FILE = os.path.join(MODEL_DIR, "model.safetensors")
 
 def download_and_extract_model():
-    """
-    Downloads and extracts model only if not already present.
-    """
-    if not os.path.exists(MODEL_DIR):
+    if not os.path.exists(MODEL_FILE):
         print("Downloading model zip from Google Drive...")
         url = f"https://drive.google.com/uc?export=download&id={FILE_ID}"
         gdown.download(url, ZIP_FILE, quiet=False)
@@ -106,3 +103,4 @@ def translate(request: TranslationRequest):
     )
 
     return {"translation": translated_text}
+

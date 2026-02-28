@@ -11,13 +11,14 @@ import torch
 app = FastAPI()
 
 # -----------------------------
-# Serve Frontend
+# Serve Frontend (NO STRUCTURE CHANGE)
 # -----------------------------
 app.mount("/static", StaticFiles(directory="frontend"), name="static")
 
 @app.get("/")
 def serve_frontend():
     return FileResponse("frontend/index.html")
+
 
 # -----------------------------
 # Model Download Configuration
@@ -26,6 +27,7 @@ MODEL_DIR = "data"
 ZIP_FILE = "data.zip"
 FILE_ID = "1KJzGif2a1HqSWGwOoqNMTWCS_wz65Ba0"
 MODEL_FILE = os.path.join(MODEL_DIR, "model.safetensors")
+
 
 def download_and_extract_model():
     if not os.path.exists(MODEL_FILE):
@@ -39,6 +41,7 @@ def download_and_extract_model():
 
         print("Model extracted successfully!")
 
+
 # -----------------------------
 # Model Setup (Lazy Loading)
 # -----------------------------
@@ -46,25 +49,27 @@ tokenizer = None
 model = None
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+
 def load_model():
     global tokenizer, model
 
     if tokenizer is None or model is None:
-        # Ensure model files exist
         download_and_extract_model()
 
         print("Loading model into memory...")
-        tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
-        model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_PATH)
+        tokenizer = AutoTokenizer.from_pretrained(MODEL_DIR)
+        model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_DIR)
         model.to(device)
         print("Model loaded successfully!")
+
 
 # -----------------------------
 # Request Schema
 # -----------------------------
 class TranslationRequest(BaseModel):
     text: str
-    language: str   # hindi or punjabi
+    language: str
+
 
 # -----------------------------
 # Translation API
@@ -72,7 +77,7 @@ class TranslationRequest(BaseModel):
 @app.post("/translate")
 def translate(request: TranslationRequest):
 
-    load_model()  # loads model only first time
+    load_model()  # loads only first time
 
     if request.language == "hindi":
         prefix = "translate English to Hindi: "
@@ -103,4 +108,3 @@ def translate(request: TranslationRequest):
     )
 
     return {"translation": translated_text}
-

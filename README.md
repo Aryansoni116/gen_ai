@@ -6,4 +6,6 @@ Model file (2.07GB) is hosted on Google Drive:
 
 Place the file inside:
 backend/data/
-[published using render](https://gen-ai-b657.onrender.com)
+
+published using render
+[website link](https://gen-ai-b657.onrender.com)

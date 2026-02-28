@@ -20,36 +20,43 @@ def serve_frontend():
     return FileResponse("frontend/index.html")
 
 # -----------------------------
-# Download & Extract Model (One-Time Setup)
+# Model Download Configuration
 # -----------------------------
 MODEL_DIR = "data"
 ZIP_FILE = "data.zip"
 FILE_ID = "1KJzGif2a1HqSWGwOoqNMTWCS_wz65Ba0"
+MODEL_PATH = "data"
 
-if not os.path.exists(MODEL_DIR):
-    print("Downloading model zip from Google Drive...")
-    url = f"https://drive.google.com/uc?export=download&id={FILE_ID}"
-    gdown.download(url, ZIP_FILE, quiet=False)
+def download_and_extract_model():
+    """
+    Downloads and extracts model only if not already present.
+    """
+    if not os.path.exists(MODEL_DIR):
+        print("Downloading model zip from Google Drive...")
+        url = f"https://drive.google.com/uc?export=download&id={FILE_ID}"
+        gdown.download(url, ZIP_FILE, quiet=False)
 
-    print("Extracting model...")
-    with zipfile.ZipFile(ZIP_FILE, 'r') as zip_ref:
-        zip_ref.extractall(".")
+        print("Extracting model...")
+        with zipfile.ZipFile(ZIP_FILE, 'r') as zip_ref:
+            zip_ref.extractall(".")
 
-    print("Model extracted successfully!")
+        print("Model extracted successfully!")
 
 # -----------------------------
 # Model Setup (Lazy Loading)
 # -----------------------------
-MODEL_PATH = "data"
-
 tokenizer = None
 model = None
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def load_model():
     global tokenizer, model
+
     if tokenizer is None or model is None:
-        print("Loading model...")
+        # Ensure model files exist
+        download_and_extract_model()
+
+        print("Loading model into memory...")
         tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
         model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_PATH)
         model.to(device)
@@ -68,9 +75,8 @@ class TranslationRequest(BaseModel):
 @app.post("/translate")
 def translate(request: TranslationRequest):
 
-    load_model()  # load only first time
+    load_model()  # loads model only first time
 
-    # Select prefix based on language
     if request.language == "hindi":
         prefix = "translate English to Hindi: "
     elif request.language == "punjabi":

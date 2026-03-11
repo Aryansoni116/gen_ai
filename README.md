@@ -10,4 +10,4 @@ backend/data/
 published using render
 [website link](https://gen-ai-b657.onrender.com)
 And gitpages for frontend
-[website link]([https://gen-ai-b657.onrender.com](https://aryansoni116.github.io/gen_ai/))
+[website link](https://gen-ai-b657.onrender.com](https://aryansoni116.github.io/gen_ai/)
